@@ -1,6 +1,6 @@
 # Maintainer: Kaito Udagawa <umireon at kaito dot tokyo>
 pkgname=live-transcribe-fine
-pkgver=0.0.0
+pkgver=0.1.0
 pkgrel=1
 pkgdesc='Transcribe with fine tuning on OBS Studio'
 arch=('x86_64')
@@ -10,7 +10,7 @@ depends=('obs-studio' 'curl' 'fmt')
 makedepends=('git' 'cmake' 'ninja')
 conflicts=("${pkgname}-git" "${pkgname}-git-debug")
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/kaito-tokyo/$pkgname/archive/refs/tags/$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('a979dda6f43250143c4151d1d0b8f4a9cea918b2e675e02ce2ad5dcb6a9c1a9a')
 
 build() {
   cd "${pkgname}-${pkgver}"

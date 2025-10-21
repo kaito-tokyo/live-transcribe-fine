@@ -15,11 +15,11 @@ fi
 # --- Variables ---
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-ARCH_PKGBUILD_PATH="${REPO_ROOT}/unsupported/arch/live-backgroundremoval-lite/PKGBUILD"
-FLATPAK_YAML_PATH="${REPO_ROOT}/unsupported/flatpak/com.obsproject.Studio.Plugin.LiveBackgroundRemovalLite.yaml"
-FLATPAK_METAINFO_PATH="${REPO_ROOT}/unsupported/flatpak/com.obsproject.Studio.Plugin.LiveBackgroundRemovalLite.metainfo.xml"
-REPO_URL="https://github.com/kaito-tokyo/live-backgroundremoval-lite"
-PKG_NAME="live-backgroundremoval-lite"
+ARCH_PKGBUILD_PATH="${REPO_ROOT}/unsupported/arch/live-transcribe-fine/PKGBUILD"
+FLATPAK_YAML_PATH="${REPO_ROOT}/unsupported/flatpak/com.obsproject.Studio.Plugin.LiveTranscribeFine.yaml"
+FLATPAK_METAINFO_PATH="${REPO_ROOT}/unsupported/flatpak/com.obsproject.Studio.Plugin.LiveTranscribeFine.metainfo.xml"
+REPO_URL="https://github.com/kaito-tokyo/live-transcribe-fine"
+PKG_NAME="live-transcribe-fine"
 
 # --- Main Script ---
 
@@ -63,7 +63,7 @@ if [ -z "${COMMIT_HASH}" ]; then
 fi
 
 # Update JSON file using jq
-FLATPAK_JSON_PATH="${REPO_ROOT}/unsupported/flatpak/com.obsproject.Studio.Plugin.LiveBackgroundRemovalLite.json"
+FLATPAK_JSON_PATH="${REPO_ROOT}/unsupported/flatpak/com.obsproject.Studio.Plugin.LiveTranscribeFine.json"
 jq --arg ver "$NEW_VERSION" --arg hash "$COMMIT_HASH" '
     (.modules[] | select(.name == "live-backgroundremoval-lite").sources[] | select(.type == "git")) 
     |= (.tag = $ver | .commit = $hash)
