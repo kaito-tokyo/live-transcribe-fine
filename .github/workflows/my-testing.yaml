@@ -78,6 +78,9 @@ jobs:
       - name: "Checkout project repository"
         uses: "actions/checkout@v5"
 
+      - name: "Install dependencies"
+        run: "brew install googletest"
+
       - name: "Configure"
         run: "cmake --preset macos-homebrew"
         
