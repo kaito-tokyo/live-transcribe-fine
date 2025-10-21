@@ -64,8 +64,8 @@ fi
 
 # Update JSON file using jq
 FLATPAK_JSON_PATH="${REPO_ROOT}/unsupported/flatpak/com.obsproject.Studio.Plugin.LiveTranscribeFine.json"
-jq --arg ver "$NEW_VERSION" --arg hash "$COMMIT_HASH" '
-    (.modules[] | select(.name == "live-backgroundremoval-lite").sources[] | select(.type == "git")) 
+jq --arg ver "$NEW_VERSION" --arg hash "$COMMIT_HASH" --arg pkgname "$PKG_NAME" '
+    (.modules[] | select(.name == $pkgname).sources[] | select(.type == "git"))
     |= (.tag = $ver | .commit = $hash)
 ' "$FLATPAK_JSON_PATH" > "$FLATPAK_JSON_PATH.tmp"
 if [ $? -ne 0 ]; then
