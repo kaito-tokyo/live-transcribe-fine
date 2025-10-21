@@ -1,0 +1,50 @@
+{
+  "id": "com.obsproject.Studio.Plugin.LiveTranscribeFine",
+  "branch": "stable",
+  "runtime": "com.obsproject.Studio",
+  "runtime-version": "stable",
+  "sdk": "org.kde.Sdk//6.8",
+  "build-extension": true,
+  "separate-locales": false,
+  "build-options": {
+    "prefix": "/app/plugins/LiveTranscribeFine"
+  },
+  "modules": [
+    {
+      "name": "live-transcribe-fine",
+      "buildsystem": "cmake-ninja",
+      "builddir": true,
+      "config-opts": [
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_PREFIX_PATH=/app/plugins/LiveTranscribeFine",
+        "-DENABLE_FRONTEND_API=ON",
+        "-DENABLE_QT=ON",
+        "-DUSE_PKGCONFIG=ON"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/kaito-tokyo/live-transcribe-fine.git",
+          "tag": "0.0.0",
+          "commit": "e96b5ebbccf391b3a7ca65b36702ac7d7592991e",
+          "x-checker-data": {
+            "type": "git",
+            "tag-pattern": "^([\\d.]+)$"
+          }
+        },
+        {
+          "type": "file",
+          "path": "com.obsproject.Studio.Plugin.LiveBackgroundRemovalLite.metainfo.xml"
+        }
+      ],
+      "post-install": [
+        "install -Dm644 --target-directory=${FLATPAK_DEST}/share/metainfo ${FLATPAK_BUILDER_BUILDDIR}/${FLATPAK_ID}.metainfo.xml"
+      ]
+    }
+  ],
+  "cleanup": [
+    "/include",
+    "/lib/cmake",
+    "/lib/pkgconfig"
+  ]
+}

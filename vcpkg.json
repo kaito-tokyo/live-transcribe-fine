@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "dependencies": [
+    "backward-cpp",
+    {
+      "name": "curl",
+      "default-features": false,
+      "features": [
+        "ssl"
+      ],
+      "platform": "(windows & !uwp) | mingw"
+    },
+    {
+      "name": "curl",
+      "default-features": false,
+      "features": [
+        "wolfssl"
+      ],
+      "platform": "(uwp | !windows) & !mingw"
+    },
+    "fmt"
+  ],
+  "features": {
+    "tests": {
+      "description": "Build with test cases",
+      "dependencies": [
+        "gtest"
+      ]
+    }
+  }
+}

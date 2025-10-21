@@ -34,6 +34,105 @@ if(ENABLE_QT)
   )
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c)
+option(BUILD_TESTING "Build tests" OFF)
+option(BUILD_WITH_HOMEBREW "Build with Homebrew on macOS" OFF)
+option(USE_PKGCONFIG "Use pkg-config to find dependencies" OFF)
+
+if(VCPKG_TARGET_TRIPLET)
+  list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}")
+
+  find_package(Backward CONFIG)
+
+  find_package(CURL CONFIG REQUIRED)
+  find_package(fmt CONFIG REQUIRED)
+elseif(USE_PKGCONFIG)
+  find_package(PkgConfig REQUIRED)
+
+  # --- CURL ---
+  pkg_check_modules(PC_CURL REQUIRED libcurl)
+  add_library(CURL::libcurl INTERFACE IMPORTED)
+  target_link_libraries(CURL::libcurl INTERFACE ${PC_CURL_LIBRARIES})
+  target_include_directories(CURL::libcurl INTERFACE ${PC_CURL_INCLUDE_DIRS})
+  target_compile_definitions(CURL::libcurl INTERFACE ${PC_CURL_CFLAGS_OTHER})
+  target_link_directories(CURL::libcurl INTERFACE ${PC_CURL_LIBRARY_DIRS})
+
+  # --- fmt ---
+  pkg_check_modules(PC_FMT REQUIRED fmt)
+  add_library(fmt::fmt INTERFACE IMPORTED)
+  target_link_libraries(fmt::fmt INTERFACE ${PC_FMT_LIBRARIES})
+  target_include_directories(fmt::fmt INTERFACE ${PC_FMT_INCLUDE_DIRS})
+  target_compile_definitions(fmt::fmt INTERFACE ${PC_FMT_CFLAGS_OTHER})
+  target_link_directories(fmt::fmt INTERFACE ${PC_FMT_LIBRARY_DIRS})
+elseif(APPLE AND BUILD_WITH_HOMEBREW)
+  list(APPEND CMAKE_PREFIX_PATH /opt/homebrew/opt/libomp)
+  list(APPEND CMAKE_PREFIX_PATH /opt/homebrew)
+  list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/libomp)
+  list(APPEND CMAKE_PREFIX_PATH /usr/local)
+
+  find_package(CURL MODULE REQUIRED)
+  find_package(fmt CONFIG REQUIRED)
+else()
+  message(FATAL_ERROR "Either USE_PKGCONFIG or VCPKG_TARGET_TRIPLET must be set.")
+endif()
+
+add_library(UpdateChecker INTERFACE)
+target_include_directories(UpdateChecker INTERFACE ${CMAKE_SOURCE_DIR}/src/UpdateChecker)
+target_link_libraries(UpdateChecker INTERFACE CURL::libcurl)
+
+add_library(BridgeUtils INTERFACE)
+target_include_directories(BridgeUtils INTERFACE ${CMAKE_SOURCE_DIR}/src/BridgeUtils)
+target_link_libraries(BridgeUtils INTERFACE OBS::libobs fmt::fmt)
+
+target_compile_definitions(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE PLUGIN_NAME="${CMAKE_PROJECT_NAME}" PLUGIN_VERSION="${CMAKE_PROJECT_VERSION}"
+)
+
+target_sources(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE
+    src/Core/MainPluginContext_c.cpp
+    src/Core/MainPluginContext.cpp
+    src/plugin-main.c
+)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC OBS::libobs BridgeUtils UpdateChecker)
+if(Backward_FOUND)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Backward::Backward)
+  target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE HAVE_BACKWARD)
+endif()
+target_compile_definitions(${CMAKE_PROJECT_NAME} PUBLIC NOMINMAX)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
+
+if(BUILD_TESTING)
+  if(VCPKG_TARGET_TRIPLET)
+    find_package(GTest CONFIG REQUIRED)
+  elseif(USE_PKGCONFIG)
+    pkg_check_modules(PC_GTEST REQUIRED gtest)
+    add_library(GTest::gtest INTERFACE IMPORTED)
+    target_link_libraries(GTest::gtest INTERFACE ${PC_GTEST_LIBRARIES})
+    target_include_directories(GTest::gtest INTERFACE ${PC_GTEST_INCLUDE_DIRS})
+    target_compile_definitions(GTest::gtest INTERFACE ${PC_GTEST_CFLAGS_OTHER})
+    target_link_directories(GTest::gtest INTERFACE ${PC_GTEST_LIBRARY_DIRS})
+
+    pkg_check_modules(PC_GTEST_MAIN REQUIRED gtest)
+    add_library(GTest::gtest_main INTERFACE IMPORTED)
+    target_link_libraries(GTest::gtest_main INTERFACE ${PC_GTEST_MAIN_LIBRARIES})
+    target_include_directories(GTest::gtest_main INTERFACE ${PC_GTEST_MAIN_INCLUDE_DIRS})
+    target_compile_definitions(GTest::gtest_main INTERFACE ${PC_GTEST_MAIN_CFLAGS_OTHER})
+    target_link_directories(GTest::gtest_main INTERFACE ${PC_GTEST_MAIN_LIBRARY_DIRS})
+  elseif(APPLE AND BUILD_WITH_HOMEBREW)
+    list(APPEND CMAKE_PREFIX_PATH /opt/homebrew/opt/libomp)
+    list(APPEND CMAKE_PREFIX_PATH /opt/homebrew)
+    list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/libomp)
+    list(APPEND CMAKE_PREFIX_PATH /usr/local)
+
+    find_package(GTest CONFIG REQUIRED)
+  else()
+    message(FATAL_ERROR "Either USE_PKGCONFIG or VCPKG_TARGET_TRIPLET must be set.")
+  endif()
+
+  enable_testing()
+
+  add_subdirectory(tests)
+endif()

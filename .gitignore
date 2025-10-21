@@ -3,18 +3,38 @@
 
 # Except for default project files
 !/.github
+!/.vscode
+/.vscode/settings.json
 !/build-aux
 !/cmake
 !/data
+!/docs
 !/src
+!/tests
+!/unsupported
+/unsupported/arch/*/*
+!/unsupported/arch/*/PKGBUILD
+/unsupported/flatpak/*
+!/unsupported/flatpak/patches/
+!/unsupported/flatpak/*.xml
+!/unsupported/flatpak/*.json
+!/unsupported/flatpak/README.md
+!/vcpkg-overlay-ports
+!/vcpkg-triplets
+!.aiexclude
 !.clang-format
 !.gersemirc
 !.gitignore
 !buildspec.json
 !CMakeLists.txt
 !CMakePresets.json
+!CODE_OF_CONDUCT.md
+!CONTRIBUTING.md
+!GEMINI.md
 !LICENSE
 !README.md
+!vcpkg-configuration.json
+!vcpkg.json
 
 # Exclude lock files
 *.lock.json
