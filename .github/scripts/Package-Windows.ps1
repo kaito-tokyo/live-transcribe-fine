@@ -70,7 +70,7 @@ function Package {
 
     # Create OBS plugin structure
     $ObsPluginDir = New-Item -Path "$StagingDir/obs-plugins/64bit" -ItemType Directory -Force
-    $DataPluginDir = New-Item -Path "$StagingDir/data/obs-plugins/$ProductName" -ItemType Directory -Force
+    $DataPluginDir = New-Item -Path "$StagingDir/data/obs-plugins/${ProductName}" -ItemType Directory -Force
 
     # Copy plugin binaries
     Copy-Item -Path "$SourceDir/bin/64bit/*" -Destination $ObsPluginDir -Recurse
