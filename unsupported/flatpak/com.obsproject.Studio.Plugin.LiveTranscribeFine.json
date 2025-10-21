@@ -25,7 +25,7 @@
         {
           "type": "git",
           "url": "https://github.com/kaito-tokyo/live-transcribe-fine.git",
-          "tag": "0.0.0",
+          "tag": "0.1.0",
           "commit": "e96b5ebbccf391b3a7ca65b36702ac7d7592991e",
           "x-checker-data": {
             "type": "git",
