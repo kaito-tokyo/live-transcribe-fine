@@ -1,8 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e0ca3ea28..efcee9a5d 100644
+index 886af19c6..2e64baa2c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -226,7 +226,8 @@ endif()
+@@ -154,9 +154,6 @@ if(MSVC)
+         CMAKE_C_FLAGS_DEBUG
+         CMAKE_C_FLAGS_RELEASE
+         )
+-    foreach(CompilerFlag ${CompilerFlags})
+-      string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+-    endforeach()
+     set(CUDA_USE_STATIC_CUDA_RUNTIME OFF CACHE INTERNAL "")
+     if(NOT DEFINED ENV{CUDAHOSTCXX})
+         set(ENV{CUDAHOSTCXX} ${CMAKE_CXX_COMPILER})
+@@ -228,7 +225,8 @@ endif()
  #            PATHS "${CMAKE_CURRENT_SOURCE_DIR}/tools/openfst/include"
  #            REQUIRED)
  
@@ -12,7 +22,7 @@ index e0ca3ea28..efcee9a5d 100644
  
  # add all native libraries
  add_subdirectory(src/base) # NOTE, we need to patch the target with version from outside
-@@ -299,7 +300,7 @@ if(NOT CONDA_ROOT)
+@@ -301,7 +299,7 @@ if(NOT CONDA_ROOT)
      configure_package_config_file(
          ${CMAKE_CURRENT_SOURCE_DIR}/cmake/kaldi-config.cmake.in
          ${CMAKE_CURRENT_BINARY_DIR}/cmake/kaldi-config.cmake
@@ -21,7 +31,7 @@ index e0ca3ea28..efcee9a5d 100644
      )
      write_basic_package_version_file(
          ${CMAKE_CURRENT_BINARY_DIR}/cmake/kaldi-config-version.cmake
-@@ -307,7 +308,7 @@ if(NOT CONDA_ROOT)
+@@ -309,7 +307,7 @@ if(NOT CONDA_ROOT)
          COMPATIBILITY AnyNewerVersion
      )
      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/kaldi-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/cmake/kaldi-config-version.cmake
