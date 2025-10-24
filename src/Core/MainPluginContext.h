@@ -57,14 +57,8 @@ public:
 
 	obs_properties_t *getProperties();
 	void update(obs_data_t *settings);
-	void activate();
-	void deactivate();
-	void show();
-	void hide();
 
-	void videoTick(float seconds);
-	void videoRender();
-	obs_source_frame *filterVideo(obs_source_frame *frame);
+	obs_audio_data *filterAudio(obs_audio_data *audio);
 };
 
 } // namespace LiveTranscribeFine
@@ -84,13 +78,7 @@ uint32_t main_plugin_context_get_height(void *data);
 void main_plugin_context_get_defaults(obs_data_t *data);
 obs_properties_t *main_plugin_context_get_properties(void *data);
 void main_plugin_context_update(void *data, obs_data_t *settings);
-void main_plugin_context_activate(void *data);
-void main_plugin_context_deactivate(void *data);
-void main_plugin_context_show(void *data);
-void main_plugin_context_hide(void *data);
-void main_plugin_context_video_tick(void *data, float seconds);
-void main_plugin_context_video_render(void *data, gs_effect_t *effect);
-struct obs_source_frame *main_plugin_context_filter_video(void *data, struct obs_source_frame *frame);
+struct obs_audio_data *main_plugin_context_filter_audio(void *data, struct obs_audio_data *audio);
 
 #ifdef __cplusplus
 }
