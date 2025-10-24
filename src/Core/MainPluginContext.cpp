@@ -71,9 +71,8 @@ obs_properties_t *MainPluginContext::getProperties()
 {
 	obs_properties_t *props = obs_properties_create();
 
-	// obs_properties_add_path(props, "voskModelPath", obs_module_text("voskModelPath"), OBS_PATH_DIRECTORY, nullptr,
-	// 			nullptr);
-	obs_properties_add_text(props, "voskModelPath", obs_module_text("voskModelPath"), OBS_TEXT_DEFAULT);
+	obs_properties_add_path(props, "voskModelPath", obs_module_text("voskModelPath"), OBS_PATH_DIRECTORY, nullptr,
+				nullptr);
 
 	return props;
 }
@@ -86,6 +85,7 @@ void MainPluginContext::update(obs_data_t *settings)
 	if (!std::filesystem::exists(newVoskModelPath)) {
 		logger.warn("Vosk model path does not exist: {}", newVoskModelPath);
 		recognitionContext.reset();
+		return;
 	}
 
 	if (pluginProperty.voskModelPath != newVoskModelPath) {
