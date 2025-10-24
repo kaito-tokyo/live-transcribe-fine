@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 886af19c6..71168ce7d 100644
+index 886af19c6..d87021b0a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -98,9 +98,11 @@ if(CONDA_ROOT)
@@ -7,11 +7,11 @@ index 886af19c6..71168ce7d 100644
  else()
      if(MATHLIB STREQUAL "OpenBLAS")
 +        find_package(OpenBLAS REQUIRED)
-+        find_package(LAPACK REQUIRED)
++        find_package(lapack REQUIRED)
          add_definitions(-DHAVE_CLAPACK=1)
          include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tools/CLAPACK)
 -        link_libraries(${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-+        link_libraries(OpenBLAS::OpenBLAS LAPACK::LAPACK)
++        link_libraries(OpenBLAS::OpenBLAS lapack)
      elseif(MATHLIB STREQUAL "MKL")
          if(NOT DEFINED ENV{MKLROOT} OR "$ENV{MKLROOT}" STREQUAL "")
              message(FATAL_ERROR "Environment variable MKLROOT is not defined")
