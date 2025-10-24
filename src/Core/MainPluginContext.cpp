@@ -79,7 +79,7 @@ obs_properties_t *MainPluginContext::getProperties()
 
 void MainPluginContext::update(obs_data_t *settings)
 {
-	bool contextNeedsUpdate = !recognitionContext;
+	bool contextNeedsUpdate = false;
 
 	const char *newVoskModelPath = obs_data_get_string(settings, "voskModelPath");
 	if (!std::filesystem::exists(newVoskModelPath)) {
@@ -93,7 +93,7 @@ void MainPluginContext::update(obs_data_t *settings)
 		contextNeedsUpdate = true;
 	}
 
-	if (contextNeedsUpdate) {
+	if (!recognitionContext || contextNeedsUpdate) {
 		float sampleRate = static_cast<float>(getOutputAudioInfo().samples_per_sec);
 		recognitionContext = std::make_unique<RecognitionContext>(logger, newVoskModelPath, sampleRate);
 	}
