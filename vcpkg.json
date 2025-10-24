@@ -18,7 +18,8 @@
       ],
       "platform": "(uwp | !windows) & !mingw"
     },
-    "fmt"
+    "fmt",
+    "vosk"
   ],
   "features": {
     "tests": {
