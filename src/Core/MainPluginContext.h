@@ -29,8 +29,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <memory>
 #include <mutex>
 
+#include <vosk_api.h>
+
 #include "../BridgeUtils/ILogger.hpp"
 #include "../BridgeUtils/ThrottledTaskQueue.hpp"
+
+#include "RecognitionContext.hpp"
 
 namespace KaitoTokyo {
 namespace LiveTranscribeFine {
@@ -42,7 +46,9 @@ public:
 
 private:
 	std::shared_future<std::string> latestVersionFuture;
+
 	const obs_audio_info outputAudioInfo;
+	std::unique_ptr<RecognitionContext> recognitionContext;
 
 public:
 	MainPluginContext(obs_data_t *const settings, obs_source_t *const source, const BridgeUtils::ILogger &logger,

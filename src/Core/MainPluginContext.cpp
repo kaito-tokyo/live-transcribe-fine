@@ -53,7 +53,8 @@ MainPluginContext::MainPluginContext(obs_data_t *const settings, obs_source_t *c
 	: source{_source},
 	  logger(_logger),
 	  latestVersionFuture(_latestVersionFuture),
-	  outputAudioInfo{getOutputAudioInfo()}
+	  outputAudioInfo{getOutputAudioInfo()},
+	  recognitionContext(std::make_unique<RecognitionContext>(logger, "/Users/umireon/vosk-models/vosk-model-ja-0.22", (float)outputAudioInfo.samples_per_sec))
 {
 	update(settings);
 }
@@ -92,49 +93,11 @@ void MainPluginContext::update(obs_data_t *settings)
 
 obs_audio_data *MainPluginContext::filterAudio(obs_audio_data *audio)
 try {
-	// Voskによる文字起こし処理
-	if (audio && audio->frames > 0 && audio->data[0]) {
-		try {
-			// Vosk recognizerの初期化（モデルは事前にロード済みと仮定）
-			static VoskRecognizer *recognizer = nullptr;
-			static VoskModel *model = nullptr;
-			if (!model) {
-				// モデルパスは適宜修正
-				model = vosk_model_new("/Users/umireon/vosk-models/vosk-model-ja-0.22");
-				if (!model) {
-					logger.error("Vosk model load failed");
-					return audio;
-				}
-			}
-			if (!recognizer) {
-				recognizer = vosk_recognizer_new(model, outputAudioInfo.samples_per_sec);
-				if (!recognizer) {
-					logger.error("Vosk recognizer init failed");
-					return audio;
-				}
-			}
-
-			// PCMデータをfloat配列に変換（OBSはfloat*型で渡す）
-			// audio->data[0]はfloat*型
-			int sample_count = audio->frames;
-			const float *pcm = reinterpret_cast<const float *>(audio->data[0]);
-			// Voskはint16_tまたはfloat対応
-			int accept_result = vosk_recognizer_accept_waveform_f(recognizer, pcm, sample_count);
-			const char *result_json = nullptr;
-			if (accept_result) {
-				result_json = vosk_recognizer_result(recognizer);
-				logger.info("Vosk transcription result: {}", result_json);
-			} else {
-				result_json = vosk_recognizer_partial_result(recognizer);
-				logger.info("Vosk transcription partial result: {}", result_json);
-			}
-		} catch (const std::exception &e) {
-			logger.error("Vosk transcription error: {}", e.what());
-		} catch (...) {
-			logger.error("Vosk transcription error: unknown error");
-		}
+	if (recognitionContext) {
+		return recognitionContext->filterAudio(audio);
+	} else {
+		return audio;
 	}
-	return audio;
 } catch (const std::exception &e) {
 	logger.error("Failed to filter audio: {}", e.what());
 	return audio;
