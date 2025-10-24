@@ -78,6 +78,7 @@ void MainPluginContext::update(obs_data_t *settings)
 
 obs_audio_data *MainPluginContext::filterAudio(obs_audio_data *audio)
 try {
+	logger.info("Filtering audio: frames={}, timestamp={}", audio->frames, audio->timestamp);
 	return audio;
 } catch (const std::exception &e) {
 	logger.error("Failed to filter audio: {}", e.what());
