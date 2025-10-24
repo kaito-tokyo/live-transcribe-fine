@@ -25,6 +25,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <obs-module.h>
 #include <obs-frontend-api.h>
 
+#include <vosk_api.h>
+
 #include <GsUnique.hpp>
 #include <ILogger.hpp>
 #include <ObsUnique.hpp>
@@ -34,12 +36,24 @@ using namespace KaitoTokyo::BridgeUtils;
 namespace KaitoTokyo {
 namespace LiveTranscribeFine {
 
+namespace {
+
+inline obs_audio_info getOutputAudioInfo()
+{
+	obs_audio_info oai;
+	obs_get_audio_info(&oai);
+	return oai;
+}
+
+} // anonymous namespace
+
 MainPluginContext::MainPluginContext(obs_data_t *const settings, obs_source_t *const _source,
 				     const BridgeUtils::ILogger &_logger,
 				     std::shared_future<std::string> _latestVersionFuture)
 	: source{_source},
 	  logger(_logger),
-	  latestVersionFuture(_latestVersionFuture)
+	  latestVersionFuture(_latestVersionFuture),
+	  outputAudioInfo{getOutputAudioInfo()}
 {
 	update(settings);
 }
@@ -79,6 +93,50 @@ void MainPluginContext::update(obs_data_t *settings)
 obs_audio_data *MainPluginContext::filterAudio(obs_audio_data *audio)
 try {
 	logger.info("Filtering audio: frames={}, timestamp={}", audio->frames, audio->timestamp);
+
+	// Voskによる文字起こし処理
+	if (audio && audio->frames > 0 && audio->data[0]) {
+		try {
+			// Vosk recognizerの初期化（モデルは事前にロード済みと仮定）
+			static VoskRecognizer *recognizer = nullptr;
+			static VoskModel *model = nullptr;
+			if (!model) {
+				// モデルパスは適宜修正
+				model = vosk_model_new("/Users/umireon/vosk-models/vosk-model-ja-0.22");
+				if (!model) {
+					logger.error("Vosk model load failed");
+					return audio;
+				}
+			}
+			if (!recognizer) {
+				recognizer = vosk_recognizer_new(model, outputAudioInfo.samples_per_sec);
+				if (!recognizer) {
+					logger.error("Vosk recognizer init failed");
+					return audio;
+				}
+			}
+
+			// PCMデータをfloat配列に変換（OBSはfloat*型で渡す）
+			// audio->data[0]はfloat*型
+			int sample_count = audio->frames * outputAudioInfo.speakers;
+			const float *pcm = reinterpret_cast<const float *>(audio->data[0]);
+			// Voskはint16_tまたはfloat対応
+			int accept_result = vosk_recognizer_accept_waveform_f(recognizer, pcm, sizeof(float) * sample_count);
+			const char *result_json = nullptr;
+			if (accept_result) {
+				result_json = vosk_recognizer_result(recognizer);
+			} else {
+				result_json = vosk_recognizer_partial_result(recognizer);
+			}
+			if (result_json) {
+				logger.info("Vosk transcription result: {}", result_json);
+			}
+		} catch (const std::exception &e) {
+			logger.error("Vosk transcription error: {}", e.what());
+		} catch (...) {
+			logger.error("Vosk transcription error: unknown error");
+		}
+	}
 	return audio;
 } catch (const std::exception &e) {
 	logger.error("Failed to filter audio: {}", e.what());

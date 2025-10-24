@@ -42,6 +42,7 @@ public:
 
 private:
 	std::shared_future<std::string> latestVersionFuture;
+	const obs_audio_info outputAudioInfo;
 
 public:
 	MainPluginContext(obs_data_t *const settings, obs_source_t *const source, const BridgeUtils::ILogger &logger,
