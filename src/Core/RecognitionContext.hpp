@@ -33,64 +33,75 @@ using UniqueVoskRecognizer = std::unique_ptr<VoskRecognizer, decltype(&vosk_reco
 
 class RecognitionContext {
 private:
-    const BridgeUtils::ILogger &logger;
-    UniqueVoskModel voskModel;
-    UniqueVoskRecognizer voskRecognizer;
+	const BridgeUtils::ILogger &logger;
+	UniqueVoskModel voskModel;
+	UniqueVoskRecognizer voskRecognizer;
 
 public:
-    RecognitionContext(const BridgeUtils::ILogger &_logger, const char *voskModelPath, float sampleRate) :
-    logger(_logger),
-    voskModel([voskModelPath](){
-        VoskModel *voskModel = vosk_model_new(voskModelPath);
-        if (!voskModel) {
-            throw std::runtime_error("Failed to load Vosk model from path: " + std::string(voskModelPath));
-        }
-        return voskModel;
-    }(), vosk_model_free),
-    voskRecognizer([rawVoskModel = voskModel.get(), sampleRate]() {
-        VoskRecognizer *voskRecognizer = vosk_recognizer_new(rawVoskModel, sampleRate);
-        if (!voskRecognizer) {
-            throw std::runtime_error("Failed to create Vosk recognizer");
-        }
-        return voskRecognizer;
-    }(), vosk_recognizer_free) {}
+	RecognitionContext(const BridgeUtils::ILogger &_logger, const char *voskModelPath, float sampleRate)
+		: logger(_logger),
+		  voskModel(
+			  [voskModelPath]() {
+				  VoskModel *voskModel = vosk_model_new(voskModelPath);
+				  if (!voskModel) {
+					  throw std::runtime_error("Failed to load Vosk model from path: " +
+								   std::string(voskModelPath));
+				  }
+				  return voskModel;
+			  }(),
+			  vosk_model_free),
+		  voskRecognizer(
+			  [rawVoskModel = voskModel.get(), sampleRate]() {
+				  VoskRecognizer *voskRecognizer = vosk_recognizer_new(rawVoskModel, sampleRate);
+				  if (!voskRecognizer) {
+					  throw std::runtime_error("Failed to create Vosk recognizer");
+				  }
+				  return voskRecognizer;
+			  }(),
+			  vosk_recognizer_free)
+	{
+	}
 
-    obs_audio_data *filterAudio(obs_audio_data *audio) {
-        if (!audio) {
-            logger.error("Invalid audio data");
-            return nullptr;
-        }
+	obs_audio_data *filterAudio(obs_audio_data *audio)
+	{
+		if (!audio) {
+			logger.error("Invalid audio data");
+			return nullptr;
+		}
 
-        if (!voskModel) {
-            logger.error("Vosk model is not initialized");
-            return audio;
-        }
+		if (!voskModel) {
+			logger.error("Vosk model is not initialized");
+			return audio;
+		}
 
-        if (!voskRecognizer) {
-            logger.error("Vosk recognizer is not initialized");
-            return audio;
-        }
+		if (!voskRecognizer) {
+			logger.error("Vosk recognizer is not initialized");
+			return audio;
+		}
 
-        int sampleCount = audio->frames;
-        const float *pcm_float = reinterpret_cast<const float *>(audio->data[0]);
-        std::vector<int16_t> pcm_int16(sampleCount);
-        for (int i = 0; i < sampleCount; ++i) {
-            float sample = pcm_float[i];
-            if (sample > 1.0f) sample = 1.0f;
-            if (sample < -1.0f) sample = -1.0f;
-            pcm_int16[i] = static_cast<int16_t>(sample * 32767.0f);
-        }
+		int sampleCount = audio->frames;
+		const float *pcm_float = reinterpret_cast<const float *>(audio->data[0]);
+		std::vector<int16_t> pcm_int16(sampleCount);
+		for (int i = 0; i < sampleCount; ++i) {
+			float sample = pcm_float[i];
+			if (sample > 1.0f)
+				sample = 1.0f;
+			if (sample < -1.0f)
+				sample = -1.0f;
+			pcm_int16[i] = static_cast<int16_t>(sample * 32767.0f);
+		}
 
-        int accept_result = vosk_recognizer_accept_waveform_s(voskRecognizer.get(), pcm_int16.data(), sampleCount);
-        const char *result_json = nullptr;
-        if (accept_result) {
-            result_json = vosk_recognizer_result(voskRecognizer.get());
-            logger.info("Vosk transcription result: {}", result_json);
-        } else {
-            result_json = vosk_recognizer_partial_result(voskRecognizer.get());
-        }
-        return audio;
-    }
+		int accept_result =
+			vosk_recognizer_accept_waveform_s(voskRecognizer.get(), pcm_int16.data(), sampleCount);
+		const char *result_json = nullptr;
+		if (accept_result) {
+			result_json = vosk_recognizer_result(voskRecognizer.get());
+			logger.info("Vosk transcription result: {}", result_json);
+		} else {
+			result_json = vosk_recognizer_partial_result(voskRecognizer.get());
+		}
+		return audio;
+	}
 };
 
 } // namespace LiveTranscribeFine

@@ -29,8 +29,6 @@ struct obs_source_info main_plugin_context = {.id = "live_transcribe_fine",
 					      .get_name = main_plugin_context_get_name,
 					      .create = main_plugin_context_create,
 					      .destroy = main_plugin_context_destroy,
-					      .get_width = main_plugin_context_get_width,
-					      .get_height = main_plugin_context_get_height,
 					      .get_defaults = main_plugin_context_get_defaults,
 					      .get_properties = main_plugin_context_get_properties,
 					      .update = main_plugin_context_update,
@@ -50,6 +48,5 @@ bool obs_module_load(void)
 
 void obs_module_unload(void)
 {
-	main_plugin_context_module_unload();
 	blog(LOG_INFO, "[" PLUGIN_NAME "] plugin unloaded");
 }

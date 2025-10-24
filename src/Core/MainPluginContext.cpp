@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "MainPluginContext.h"
 
+#include <filesystem>
 #include <future>
 #include <stdexcept>
 #include <thread>
@@ -52,43 +53,50 @@ MainPluginContext::MainPluginContext(obs_data_t *const settings, obs_source_t *c
 				     std::shared_future<std::string> _latestVersionFuture)
 	: source{_source},
 	  logger(_logger),
-	  latestVersionFuture(_latestVersionFuture),
-	  outputAudioInfo{getOutputAudioInfo()},
-	  recognitionContext(std::make_unique<RecognitionContext>(logger, "/Users/umireon/vosk-models/vosk-model-ja-0.22", (float)outputAudioInfo.samples_per_sec))
+	  latestVersionFuture(_latestVersionFuture)
 {
 	update(settings);
 }
-
-void MainPluginContext::startup() noexcept {}
 
 void MainPluginContext::shutdown() noexcept {}
 
 MainPluginContext::~MainPluginContext() noexcept {}
 
-std::uint32_t MainPluginContext::getWidth() const noexcept
-{
-	return 0;
-}
-
-std::uint32_t MainPluginContext::getHeight() const noexcept
-{
-	return 0;
-}
-
 void MainPluginContext::getDefaults(obs_data_t *data)
 {
-	UNUSED_PARAMETER(data);
+	obs_data_set_default_string(data, "voskModelPath", "");
 }
 
 obs_properties_t *MainPluginContext::getProperties()
 {
 	obs_properties_t *props = obs_properties_create();
+
+	// obs_properties_add_path(props, "voskModelPath", obs_module_text("voskModelPath"), OBS_PATH_DIRECTORY, nullptr,
+	// 			nullptr);
+	obs_properties_add_text(props, "voskModelPath", obs_module_text("voskModelPath"), OBS_TEXT_DEFAULT);
+
 	return props;
 }
 
 void MainPluginContext::update(obs_data_t *settings)
 {
-	UNUSED_PARAMETER(settings);
+	bool contextNeedsUpdate = !recognitionContext;
+
+	const char *newVoskModelPath = obs_data_get_string(settings, "voskModelPath");
+	if (!std::filesystem::exists(newVoskModelPath)) {
+		logger.warn("Vosk model path does not exist: {}", newVoskModelPath);
+		recognitionContext.reset();
+	}
+
+	if (pluginProperty.voskModelPath != newVoskModelPath) {
+		pluginProperty.voskModelPath = newVoskModelPath;
+		contextNeedsUpdate = true;
+	}
+
+	if (contextNeedsUpdate) {
+		float sampleRate = getOutputAudioInfo().samples_per_sec;
+		recognitionContext = std::make_unique<RecognitionContext>(logger, newVoskModelPath, sampleRate);
+	}
 }
 
 obs_audio_data *MainPluginContext::filterAudio(obs_audio_data *audio)

@@ -22,9 +22,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <obs-module.h>
 
-#include "../BridgeUtils/GsUnique.hpp"
-#include "../BridgeUtils/ObsLogger.hpp"
-#include "../UpdateChecker/UpdateChecker.hpp"
+#include <ObsLogger.hpp>
+#include <UpdateChecker.hpp>
 
 #include "PluginConfig.hpp"
 
@@ -53,37 +52,24 @@ try {
 		}).share();
 	return true;
 } catch (const std::exception &e) {
-	logger().error("Failed to load main plugin context: %s", e.what());
+	logger().logException(e, "Failed to load main plugin context");
 	return false;
 } catch (...) {
 	logger().error("Failed to load main plugin context: unknown error");
 	return false;
 }
 
-void main_plugin_context_module_unload()
-try {
-	GraphicsContextGuard graphicsContextGuard;
-	GsUnique::drain();
-} catch (const std::exception &e) {
-	logger().error("Failed to unload plugin context: %s", e.what());
-} catch (...) {
-	logger().error("Failed to unload main plugin context: unknown error");
-}
-
-const char *main_plugin_context_get_name(void *type_data)
+const char *main_plugin_context_get_name(void *)
 {
-	UNUSED_PARAMETER(type_data);
 	return obs_module_text("pluginName");
 }
 
 void *main_plugin_context_create(obs_data_t *settings, obs_source_t *source)
 try {
-	GraphicsContextGuard graphicsContextGuard;
 	auto self = std::make_shared<MainPluginContext>(settings, source, logger(), latestVersionFuture);
-	self->startup();
 	return new std::shared_ptr<MainPluginContext>(self);
 } catch (const std::exception &e) {
-	logger().error("Failed to create main plugin context: %s", e.what());
+	logger().logException(e, "Failed to create main plugin context");
 	return nullptr;
 } catch (...) {
 	logger().error("Failed to create main plugin context: unknown error");
@@ -101,40 +87,10 @@ try {
 	self->get()->shutdown();
 	delete self;
 
-	GraphicsContextGuard graphicsContextGuard;
-	GsUnique::drain();
 } catch (const std::exception &e) {
-	logger().error("Failed to destroy main plugin context: %s", e.what());
-
-	GraphicsContextGuard graphicsContextGuard;
-	GsUnique::drain();
+	logger().logException(e, "Failed to destroy main plugin context");
 } catch (...) {
 	logger().error("Failed to destroy main plugin context: unknown error");
-
-	GraphicsContextGuard graphicsContextGuard;
-	GsUnique::drain();
-}
-
-std::uint32_t main_plugin_context_get_width(void *data)
-{
-	if (!data) {
-		logger().error("main_plugin_context_get_width called with null data");
-		return 0;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	return self->get()->getWidth();
-}
-
-std::uint32_t main_plugin_context_get_height(void *data)
-{
-	if (!data) {
-		logger().error("main_plugin_context_get_height called with null data");
-		return 0;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	return self->get()->getHeight();
 }
 
 void main_plugin_context_get_defaults(obs_data_t *data)
@@ -152,7 +108,7 @@ try {
 	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
 	return self->get()->getProperties();
 } catch (const std::exception &e) {
-	logger().error("Failed to get properties: %s", e.what());
+	logger().logException(e, "Failed to get properties");
 	return obs_properties_create();
 } catch (...) {
 	logger().error("Failed to get properties: unknown error");
@@ -169,7 +125,7 @@ try {
 	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
 	self->get()->update(settings);
 } catch (const std::exception &e) {
-	logger().error("Failed to update main plugin context: %s", e.what());
+	logger().logException(e, "Failed to update main plugin context");
 } catch (...) {
 	logger().error("Failed to update main plugin context: unknown error");
 }
@@ -184,7 +140,7 @@ try {
 	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
 	return self->get()->filterAudio(audio);
 } catch (const std::exception &e) {
-	logger().error("Failed to filter audio in main plugin context: %s", e.what());
+	logger().logException(e, "Failed to filter audio in main plugin context");
 	return audio;
 } catch (...) {
 	logger().error("Failed to filter audio in main plugin context: unknown error");

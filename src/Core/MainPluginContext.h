@@ -24,16 +24,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ifdef __cplusplus
 
-#include <atomic>
 #include <future>
 #include <memory>
-#include <mutex>
 
 #include <vosk_api.h>
 
-#include "../BridgeUtils/ILogger.hpp"
-#include "../BridgeUtils/ThrottledTaskQueue.hpp"
+#include <ILogger.hpp>
 
+#include "PluginProperty.hpp"
 #include "RecognitionContext.hpp"
 
 namespace KaitoTokyo {
@@ -47,18 +45,16 @@ public:
 private:
 	std::shared_future<std::string> latestVersionFuture;
 
-	const obs_audio_info outputAudioInfo;
-	std::unique_ptr<RecognitionContext> recognitionContext;
+	PluginProperty pluginProperty;
+
+	std::unique_ptr<RecognitionContext> recognitionContext = nullptr;
 
 public:
 	MainPluginContext(obs_data_t *const settings, obs_source_t *const source, const BridgeUtils::ILogger &logger,
 			  std::shared_future<std::string> latestVersionFuture);
-	void startup() noexcept;
+
 	void shutdown() noexcept;
 	~MainPluginContext() noexcept;
-
-	uint32_t getWidth() const noexcept;
-	uint32_t getHeight() const noexcept;
 
 	static void getDefaults(obs_data_t *data);
 
@@ -75,13 +71,10 @@ extern "C" {
 #endif // __cplusplus
 
 bool main_plugin_context_module_load(void);
-void main_plugin_context_module_unload(void);
 
 const char *main_plugin_context_get_name(void *type_data);
 void *main_plugin_context_create(obs_data_t *settings, obs_source_t *source);
 void main_plugin_context_destroy(void *data);
-uint32_t main_plugin_context_get_width(void *data);
-uint32_t main_plugin_context_get_height(void *data);
 void main_plugin_context_get_defaults(obs_data_t *data);
 obs_properties_t *main_plugin_context_get_properties(void *data);
 void main_plugin_context_update(void *data, obs_data_t *settings);
