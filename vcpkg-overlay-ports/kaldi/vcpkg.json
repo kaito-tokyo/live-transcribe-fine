@@ -6,10 +6,6 @@
   "license": "Apache-2.0",
   "dependencies": [
     "clapack",
-    {
-      "name": "openblas",
-      "platform": "!osx"
-    },
     "openfst",
     {
       "name": "vcpkg-cmake",
