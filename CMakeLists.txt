@@ -82,10 +82,7 @@ target_compile_definitions(
 
 target_sources(
   ${CMAKE_PROJECT_NAME}
-  PRIVATE
-    src/Core/MainPluginContext_c.cpp
-    src/Core/MainPluginContext.cpp
-    src/plugin-main.c
+  PRIVATE src/Core/MainPluginContext_c.cpp src/Core/MainPluginContext.cpp src/plugin-main.c
 )
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC OBS::libobs BridgeUtils UpdateChecker vosk::vosk)
 if(Backward_FOUND)
