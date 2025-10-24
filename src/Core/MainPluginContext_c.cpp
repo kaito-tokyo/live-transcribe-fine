@@ -174,113 +174,19 @@ try {
 	logger().error("Failed to update main plugin context: unknown error");
 }
 
-void main_plugin_context_activate(void *data)
+obs_audio_data *main_plugin_context_filter_audio(void *data, obs_audio_data *audio)
 try {
 	if (!data) {
-		logger().error("main_plugin_context_activate called with null data");
-		return;
+		logger().error("main_plugin_context_filter_audio called with null data");
+		return audio;
 	}
 
 	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	self->get()->activate();
+	return self->get()->filterAudio(audio);
 } catch (const std::exception &e) {
-	logger().error("Failed to activate main plugin context: %s", e.what());
+	logger().error("Failed to filter audio in main plugin context: %s", e.what());
+	return audio;
 } catch (...) {
-	logger().error("Failed to activate main plugin context: unknown error");
-}
-
-void main_plugin_context_deactivate(void *data)
-try {
-	if (!data) {
-		logger().error("main_plugin_context_deactivate called with null data");
-		return;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	self->get()->deactivate();
-} catch (const std::exception &e) {
-	logger().error("Failed to deactivate main plugin context: %s", e.what());
-} catch (...) {
-	logger().error("Failed to deactivate main plugin context: unknown error");
-}
-
-void main_plugin_context_show(void *data)
-try {
-	if (!data) {
-		logger().error("main_plugin_context_show called with null data");
-		return;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	self->get()->show();
-} catch (const std::exception &e) {
-	logger().error("Failed to show main plugin context: %s", e.what());
-} catch (...) {
-	logger().error("Failed to show main plugin context: unknown error");
-}
-
-void main_plugin_context_hide(void *data)
-try {
-	if (!data) {
-		logger().error("main_plugin_context_hide called with null data");
-		return;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	self->get()->hide();
-} catch (const std::exception &e) {
-	logger().error("Failed to hide main plugin context: %s", e.what());
-} catch (...) {
-	logger().error("Failed to hide main plugin context: unknown error");
-}
-
-void main_plugin_context_video_tick(void *data, float seconds)
-try {
-	if (!data) {
-		logger().error("main_plugin_context_video_tick called with null data");
-		return;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	self->get()->videoTick(seconds);
-} catch (const std::exception &e) {
-	logger().error("Failed to tick main plugin context: %s", e.what());
-} catch (...) {
-	logger().error("Failed to tick main plugin context: unknown error");
-}
-
-void main_plugin_context_video_render(void *data, gs_effect_t *_unused)
-try {
-	UNUSED_PARAMETER(_unused);
-
-	if (!data) {
-		logger().error("main_plugin_context_video_render called with null data");
-		return;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	self->get()->videoRender();
-	GsUnique::drain();
-} catch (const std::exception &e) {
-	logger().error("Failed to render video in main plugin context: %s", e.what());
-} catch (...) {
-	logger().error("Failed to render video in main plugin context: unknown error");
-}
-
-struct obs_source_frame *main_plugin_context_filter_video(void *data, struct obs_source_frame *frame)
-try {
-	if (!data) {
-		logger().error("main_plugin_context_filter_video called with null data");
-		return frame;
-	}
-
-	auto self = static_cast<std::shared_ptr<MainPluginContext> *>(data);
-	obs_source_frame *result = self->get()->filterVideo(frame);
-	return result;
-} catch (const std::exception &e) {
-	logger().error("Failed to filter video in main plugin context: %s", e.what());
-	return frame;
-} catch (...) {
-	logger().error("Failed to filter video in main plugin context: unknown error");
-	return frame;
+	logger().error("Failed to filter audio in main plugin context: unknown error");
+	return audio;
 }

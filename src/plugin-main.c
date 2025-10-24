@@ -25,7 +25,7 @@ OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
 
 struct obs_source_info main_plugin_context = {.id = "live_transcribe_fine",
 					      .type = OBS_SOURCE_TYPE_FILTER,
-					      .output_flags = OBS_SOURCE_VIDEO,
+					      .output_flags = OBS_SOURCE_AUDIO,
 					      .get_name = main_plugin_context_get_name,
 					      .create = main_plugin_context_create,
 					      .destroy = main_plugin_context_destroy,
@@ -34,13 +34,7 @@ struct obs_source_info main_plugin_context = {.id = "live_transcribe_fine",
 					      .get_defaults = main_plugin_context_get_defaults,
 					      .get_properties = main_plugin_context_get_properties,
 					      .update = main_plugin_context_update,
-					      .activate = main_plugin_context_activate,
-					      .deactivate = main_plugin_context_deactivate,
-					      .show = main_plugin_context_show,
-					      .hide = main_plugin_context_hide,
-					      .video_tick = main_plugin_context_video_tick,
-					      .video_render = main_plugin_context_video_render,
-					      .filter_video = main_plugin_context_filter_video};
+					      .filter_audio = main_plugin_context_filter_audio};
 
 bool obs_module_load(void)
 {

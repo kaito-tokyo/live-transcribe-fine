@@ -76,33 +76,15 @@ void MainPluginContext::update(obs_data_t *settings)
 	UNUSED_PARAMETER(settings);
 }
 
-void MainPluginContext::activate() {}
-
-void MainPluginContext::deactivate() {}
-
-void MainPluginContext::show() {}
-
-void MainPluginContext::hide() {}
-
-void MainPluginContext::videoTick(float seconds)
-{
-	UNUSED_PARAMETER(seconds);
-}
-
-void MainPluginContext::videoRender()
-{
-	obs_source_skip_video_filter(source);
-}
-
-obs_source_frame *MainPluginContext::filterVideo(struct obs_source_frame *frame)
+obs_audio_data *MainPluginContext::filterAudio(obs_audio_data *audio)
 try {
-	return frame;
+	return audio;
 } catch (const std::exception &e) {
-	logger.error("Failed to create rendering context: {}", e.what());
-	return frame;
+	logger.error("Failed to filter audio: {}", e.what());
+	return audio;
 } catch (...) {
-	logger.error("Failed to create rendering context: unknown error");
-	return frame;
+	logger.error("Failed to filter audio: unknown error");
+	return audio;
 }
 
 } // namespace LiveTranscribeFine
