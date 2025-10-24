@@ -1,8 +1,13 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b754f1e..e3e7a46 100644
+index b754f1e..ca415c3 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -4,18 +4,63 @@ project(vosk-api CXX)
+@@ -1,21 +1,61 @@
+ cmake_minimum_required(VERSION 3.13)
+ project(vosk-api CXX)
+ 
++include(GNUInstallDirs)
++
  set(CMAKE_CXX_STANDARD 17)
  set(CMAKE_CXX_EXTENSIONS OFF)
  
@@ -21,10 +26,6 @@ index b754f1e..e3e7a46 100644
 +    src/spk_model.cc
 +    src/vosk_api.cc
 +    src/postprocessor.cc
-+)
-+target_include_directories(
-+    vosk
-+    PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 +)
 +set_target_properties(vosk PROPERTIES PUBLIC_HEADER src/vosk_api.h)
 +
@@ -46,7 +47,7 @@ index b754f1e..e3e7a46 100644
 +        OpenFst::fstngram
 +)
  
- include(GNUInstallDirs)
+-include(GNUInstallDirs)
 -install(TARGETS vosk DESTINATION ${CMAKE_INSTALL_LIBDIR})
 -install(FILES src/vosk_api.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 +install(
@@ -58,14 +59,12 @@ index b754f1e..e3e7a46 100644
 +    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 +)
 +
-+# Export the vosk target for downstream usage
 +install(
 +    EXPORT vosk-targets
 +    NAMESPACE vosk::
 +    DESTINATION ${CMAKE_INSTALL_DATADIR}/vosk
 +)
 +
-+# Generate and install vosk-config.cmake
 +include(CMakePackageConfigHelpers)
 +configure_package_config_file(
 +    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/vosk-config.cmake.in
