@@ -92,8 +92,6 @@ void MainPluginContext::update(obs_data_t *settings)
 
 obs_audio_data *MainPluginContext::filterAudio(obs_audio_data *audio)
 try {
-	logger.info("Filtering audio: frames={}, timestamp={}", audio->frames, audio->timestamp);
-
 	// Voskによる文字起こし処理
 	if (audio && audio->frames > 0 && audio->data[0]) {
 		try {
@@ -118,18 +116,17 @@ try {
 
 			// PCMデータをfloat配列に変換（OBSはfloat*型で渡す）
 			// audio->data[0]はfloat*型
-			int sample_count = audio->frames * outputAudioInfo.speakers;
+			int sample_count = audio->frames;
 			const float *pcm = reinterpret_cast<const float *>(audio->data[0]);
 			// Voskはint16_tまたはfloat対応
-			int accept_result = vosk_recognizer_accept_waveform_f(recognizer, pcm, sizeof(float) * sample_count);
+			int accept_result = vosk_recognizer_accept_waveform_f(recognizer, pcm, sample_count);
 			const char *result_json = nullptr;
 			if (accept_result) {
 				result_json = vosk_recognizer_result(recognizer);
+				logger.info("Vosk transcription result: {}", result_json);
 			} else {
 				result_json = vosk_recognizer_partial_result(recognizer);
-			}
-			if (result_json) {
-				logger.info("Vosk transcription result: {}", result_json);
+				logger.info("Vosk transcription partial result: {}", result_json);
 			}
 		} catch (const std::exception &e) {
 			logger.error("Vosk transcription error: {}", e.what());

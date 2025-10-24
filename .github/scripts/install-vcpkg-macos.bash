@@ -112,7 +112,7 @@ main() {
     log_info "Starting vcpkg builds for required architectures..."
 
     local VCPKG_TESTS_ARG=""
-    if [[ "${VCPKG_ENABLE_TESTS:-0}" == "1" ]]; then
+    if [[ "${VCPKG_DISABLE_TESTS:-0}" != "1" ]]; then
         VCPKG_TESTS_ARG="--x-feature=tests"
         log_info "Enabling vcpkg tests feature (--x-feature=tests)"
     fi
