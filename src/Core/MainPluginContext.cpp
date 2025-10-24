@@ -94,7 +94,7 @@ void MainPluginContext::update(obs_data_t *settings)
 	}
 
 	if (contextNeedsUpdate) {
-		float sampleRate = getOutputAudioInfo().samples_per_sec;
+		float sampleRate = static_cast<float>(getOutputAudioInfo().samples_per_sec);
 		recognitionContext = std::make_unique<RecognitionContext>(logger, newVoskModelPath, sampleRate);
 	}
 }
