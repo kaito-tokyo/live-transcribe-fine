@@ -6,6 +6,10 @@
   "license": "Apache-2.0",
   "dependencies": [
     {
+      "name": "lapack",
+      "platform": "!osx"
+    },
+    {
       "name": "openblas",
       "platform": "!osx"
     },
