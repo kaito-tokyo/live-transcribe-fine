@@ -39,6 +39,7 @@ option(USE_PKGCONFIG "Use pkg-config to find dependencies" OFF)
 
 if(VCPKG_TARGET_TRIPLET)
   list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}")
+  list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/share/lapack")
 
   find_package(Backward CONFIG)
 
