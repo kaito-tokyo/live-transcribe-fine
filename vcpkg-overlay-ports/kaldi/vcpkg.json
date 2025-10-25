@@ -5,7 +5,7 @@
   "homepage": "https://github.com/alphacep/kaldi",
   "license": "Apache-2.0",
   "dependencies": [
-    "clapack",
+    "lapack",
     "openfst",
     {
       "name": "vcpkg-cmake",

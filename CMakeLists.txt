@@ -35,16 +35,17 @@ if(ENABLE_QT)
 endif()
 
 option(BUILD_TESTING "Build tests" OFF)
-option(BUILD_WITH_HOMEBREW "Build with Homebrew on macOS" OFF)
 option(USE_PKGCONFIG "Use pkg-config to find dependencies" OFF)
 
 if(VCPKG_TARGET_TRIPLET)
   list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}")
+  list(PREPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/share/lapack")
 
   find_package(Backward CONFIG)
 
   find_package(CURL CONFIG REQUIRED)
   find_package(fmt CONFIG REQUIRED)
+  find_package(vosk CONFIG REQUIRED)
 elseif(USE_PKGCONFIG)
   find_package(PkgConfig REQUIRED)
 
@@ -63,14 +64,6 @@ elseif(USE_PKGCONFIG)
   target_include_directories(fmt::fmt INTERFACE ${PC_FMT_INCLUDE_DIRS})
   target_compile_definitions(fmt::fmt INTERFACE ${PC_FMT_CFLAGS_OTHER})
   target_link_directories(fmt::fmt INTERFACE ${PC_FMT_LIBRARY_DIRS})
-elseif(APPLE AND BUILD_WITH_HOMEBREW)
-  list(APPEND CMAKE_PREFIX_PATH /opt/homebrew/opt/libomp)
-  list(APPEND CMAKE_PREFIX_PATH /opt/homebrew)
-  list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/libomp)
-  list(APPEND CMAKE_PREFIX_PATH /usr/local)
-
-  find_package(CURL MODULE REQUIRED)
-  find_package(fmt CONFIG REQUIRED)
 else()
   message(FATAL_ERROR "Either USE_PKGCONFIG or VCPKG_TARGET_TRIPLET must be set.")
 endif()
@@ -90,12 +83,9 @@ target_compile_definitions(
 
 target_sources(
   ${CMAKE_PROJECT_NAME}
-  PRIVATE
-    src/Core/MainPluginContext_c.cpp
-    src/Core/MainPluginContext.cpp
-    src/plugin-main.c
+  PRIVATE src/Core/MainPluginContext_c.cpp src/Core/MainPluginContext.cpp src/plugin-main.c
 )
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC OBS::libobs BridgeUtils UpdateChecker)
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC OBS::libobs BridgeUtils UpdateChecker vosk::vosk)
 if(Backward_FOUND)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Backward::Backward)
   target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE HAVE_BACKWARD)
