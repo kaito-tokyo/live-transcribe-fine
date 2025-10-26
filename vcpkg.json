@@ -19,7 +19,8 @@
       "platform": "(uwp | !windows) & !mingw"
     },
     "fmt",
-    "vosk"
+    "vosk",
+    "uwebsockets"
   ],
   "default-features": [
     "tests"
