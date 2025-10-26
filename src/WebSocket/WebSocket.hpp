@@ -30,15 +30,16 @@ namespace WebSocket {
 // WebSocketServerクラスは特定のポートでWebSocketサーバーを立ち上げ、接続を管理する
 // WebSocketContextクラスは個々のWebSocketエンドポイントを管理し、メッセージの送受信を行う
 
+// WebSocketとのやりとりに関する振る舞いはこのクラスで全て定義される
 class WebSocketContext {
 public:
+    WebSocketContext(std::string path, std::string password);
     void broadcastText(const std::string& message);
-}
+};
 
 class WebSocketServer {
 public:
     WebSocketServer(int port);
-    ~WebSocketServer();
 
     // 指定されたパスでWebSocketエンドポイントを作成し、対応するコンテキストを返す。
     std::shared_ptr<class WebSocketContext> createContext(const std::string& path);
